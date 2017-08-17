@@ -1,27 +1,35 @@
 {
+  "__inputs": [],
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "4.3.1"
+    },
+    {
+      "type": "panel",
+      "id": "graph",
+      "name": "Graph",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "text",
+      "name": "Text",
+      "version": ""
+    }
+  ],
   "annotations": {
-    "list": [
-      {
-        "datasource": "events",
-        "enable": true,
-        "iconColor": "rgba(255, 96, 96, 1)",
-        "limit": 100,
-        "name": "windows",
-        "query": "select title, tags, text from hostevents where $timeFilter",
-        "tagsColumn": "tags",
-        "textColumn": "text",
-        "titleColumn": "title",
-        "type": "alert"
-      }
-    ]
+    "list": []
   },
   "editable": true,
   "gnetId": null,
   "graphTooltip": 2,
   "hideControls": false,
-  "id": 7,
+  "id": null,
   "links": [],
-  "refresh": false,
+  "refresh": "1m",
   "rows": [
     {
       "collapse": true,
@@ -32,7 +40,7 @@
           "id": 2,
           "links": [],
           "mode": "markdown",
-          "span": 4,
+          "span": 3,
           "title": "% Processor Time",
           "type": "text"
         },
@@ -41,7 +49,7 @@
           "id": 3,
           "links": [],
           "mode": "markdown",
-          "span": 4,
+          "span": 3,
           "title": "% Privileged Time",
           "type": "text"
         },
@@ -50,8 +58,17 @@
           "id": 4,
           "links": [],
           "mode": "markdown",
-          "span": 4,
+          "span": 3,
           "title": "% User Time",
+          "type": "text"
+        },
+        {
+          "content": "'% времени прерываний' - время, которое процессор тратит на получение и обслуживание аппаратных прерываний в течение интервала выборки. Эта величина является косвенным показателем активности устройств, формирующих аппаратные прерывания, таких как системного таймера, мыши, драйверов дисков, линий передачи данных, сетевых адаптеров и других периферийных устройств. Эти устройства обычно прерывают работу процессора при завершении своей работы или при возникновении необходимости обработки запроса. При этом обычное выполнение потока команд приостанавливается. Системный таймер обычно прерывает работу процессора каждые 10 миллисекунд, создавая 'фон' аппаратных прерываний. Поэтому эта величина отображает разницу между значениями последних двух выборок, поделённую на длительность интервала выборки.\n",
+          "id": 23,
+          "links": [],
+          "mode": "markdown",
+          "span": 3,
+          "title": "% Interrupt Time Counter",
           "type": "text"
         }
       ],
@@ -63,13 +80,15 @@
       "titleSize": "h6"
     },
     {
-      "collapse": false,
+      "collapse": true,
       "height": "500",
       "panels": [
         {
           "aliasColors": {},
           "bars": false,
-          "datasource": "telegraf",
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
           "decimals": 1,
           "fill": 1,
           "id": 10,
@@ -104,6 +123,7 @@
               "linewidth": 3
             }
           ],
+          "spaceLength": 10,
           "span": 9,
           "stack": false,
           "steppedLine": false,
@@ -126,7 +146,10 @@
                 }
               ],
               "measurement": "win_cpu",
+              "orderByTime": "ASC",
               "policy": "autogen",
+              "query": "SELECT percentile(\"Percent_Processor_Time\", $percentile) FROM \"autogen\".\"win_cpu\" WHERE \"instance\" = '_Total' AND $timeFilter GROUP BY time($stepInterval) fill(none)",
+              "rawQuery": false,
               "refId": "A",
               "resultFormat": "time_series",
               "select": [
@@ -171,6 +194,7 @@
                 }
               ],
               "measurement": "win_cpu",
+              "orderByTime": "ASC",
               "policy": "autogen",
               "refId": "B",
               "resultFormat": "time_series",
@@ -223,6 +247,7 @@
           },
           "type": "graph",
           "xaxis": {
+            "buckets": null,
             "mode": "time",
             "name": null,
             "show": true,
@@ -255,6 +280,98 @@
           "span": 3,
           "title": "% Processor Time",
           "type": "text"
+        },
+        {
+          "aliasColors": {
+            "win_system.Processor_Queue_Length": "#EF843C"
+          },
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "fill": 1,
+          "id": 26,
+          "legend": {
+            "alignAsTable": true,
+            "avg": false,
+            "current": true,
+            "max": true,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "span": 9,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "alias": "CPU Queue Length",
+              "dsType": "influxdb",
+              "groupBy": [],
+              "measurement": "win_system",
+              "orderByTime": "ASC",
+              "policy": "autogen",
+              "refId": "A",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "Processor_Queue_Length"
+                    ],
+                    "type": "field"
+                  }
+                ]
+              ],
+              "tags": []
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Processor Queue Length",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": "",
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": false
+            }
+          ]
         }
       ],
       "repeat": null,
@@ -265,13 +382,15 @@
       "titleSize": "h6"
     },
     {
-      "collapse": false,
+      "collapse": true,
       "height": "500",
       "panels": [
         {
           "aliasColors": {},
           "bars": false,
-          "datasource": "telegraf",
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
           "decimals": 1,
           "fill": 1,
           "id": 11,
@@ -306,6 +425,7 @@
               "linewidth": 3
             }
           ],
+          "spaceLength": 10,
           "span": 9,
           "stack": false,
           "steppedLine": false,
@@ -328,6 +448,7 @@
                 }
               ],
               "measurement": "win_cpu",
+              "orderByTime": "ASC",
               "policy": "autogen",
               "refId": "A",
               "resultFormat": "time_series",
@@ -373,6 +494,7 @@
                 }
               ],
               "measurement": "win_cpu",
+              "orderByTime": "ASC",
               "policy": "autogen",
               "refId": "B",
               "resultFormat": "time_series",
@@ -427,6 +549,7 @@
           },
           "type": "graph",
           "xaxis": {
+            "buckets": null,
             "mode": "time",
             "name": null,
             "show": true,
@@ -461,13 +584,18 @@
           "type": "text"
         },
         {
-          "aliasColors": {},
+          "aliasColors": {
+            "Privileged_Time / Processor_Time": "#F4D598",
+            "Линия тренда": "#705DA0"
+          },
           "bars": false,
-          "datasource": "telegraf",
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
           "decimals": 1,
           "description": "Интересно мониторить отношение «% Privileged Time» к «% Processor Time». Существенные скачки этого отношения указывают на изменения в нагрузке, влияющие на производительность, на вероятные узкие места.",
           "fill": 1,
-          "id": 9,
+          "id": 22,
           "legend": {
             "alignAsTable": true,
             "avg": true,
@@ -488,17 +616,57 @@
           "renderer": "flot",
           "seriesOverrides": [
             {
-              "alias": "mean(% Privileged Time) / mean(% Processor Time)",
-              "color": "#705DA0",
-              "fill": 3
+              "alias": "Линия тренда",
+              "fill": 0,
+              "linewidth": 3
             }
           ],
+          "spaceLength": 10,
           "span": 9,
-          "stack": true,
+          "stack": false,
           "steppedLine": false,
           "targets": [
             {
-              "alias": "mean(% Privileged Time) / mean(% Processor Time)",
+              "alias": "Privileged_Time / Processor_Time",
+              "dsType": "influxdb",
+              "groupBy": [
+                {
+                  "params": [
+                    "$__interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "params": [
+                    "null"
+                  ],
+                  "type": "fill"
+                }
+              ],
+              "orderByTime": "ASC",
+              "policy": "default",
+              "query": "select \"Percent_Privileged_Time\" / \"Percent_Processor_Time\" FROM autogen.win_cpu WHERE \"instance\" = '_Total' AND $timeFilter fill(none)\n",
+              "rawQuery": true,
+              "refId": "A",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "value"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "mean"
+                  }
+                ]
+              ],
+              "tags": []
+            },
+            {
+              "alias": "Линия тренда",
               "dsType": "influxdb",
               "groupBy": [
                 {
@@ -515,8 +683,9 @@
                 }
               ],
               "measurement": "win_cpu",
+              "orderByTime": "ASC",
               "policy": "autogen",
-              "query": "SELECT mean(\"Percent_Privileged_Time\") / mean(\"Percent_Processor_Time\") FROM \"autogen\".\"win_cpu\" WHERE \"instance\" = '_Total' AND $timeFilter GROUP BY time($stepInterval) fill(none)",
+              "query": "select mean(c) from (select \"Percent_Privileged_Time\" / \"Percent_Processor_Time\" as c FROM autogen.win_cpu WHERE \"instance\" = '_Total' AND $timeFilter fill(none)) where $timeFilter group by time($stepInterval)\n",
               "rawQuery": true,
               "refId": "B",
               "resultFormat": "time_series",
@@ -564,11 +733,12 @@
           "title": "Processor(_Total): \"% Privileged Time\" / \"% Processor Time\"",
           "tooltip": {
             "shared": true,
-            "sort": 0,
+            "sort": 2,
             "value_type": "individual"
           },
           "type": "graph",
           "xaxis": {
+            "buckets": null,
             "mode": "time",
             "name": null,
             "show": true,
@@ -577,18 +747,18 @@
           "yaxes": [
             {
               "format": "percentunit",
-              "label": null,
+              "label": "",
               "logBase": 1,
-              "max": null,
-              "min": null,
+              "max": "1",
+              "min": "0",
               "show": true
             },
             {
               "format": "percent",
               "label": null,
-              "logBase": 2,
-              "max": null,
-              "min": null,
+              "logBase": 1,
+              "max": "100",
+              "min": "0",
               "show": false
             }
           ]
@@ -599,7 +769,7 @@
           "links": [],
           "mode": "markdown",
           "span": 3,
-          "title": "Описание",
+          "title": "% Privileged Time",
           "type": "text"
         }
       ],
@@ -607,17 +777,19 @@
       "repeatIteration": null,
       "repeatRowId": null,
       "showTitle": true,
-      "title": "Утилизация процессора: 95 перцентиль \"% Privileged Time\" на фоне 95 перцентиль \"% Processor Time\"",
+      "title": "Privileged Time",
       "titleSize": "h6"
     },
     {
-      "collapse": false,
-      "height": "400",
+      "collapse": true,
+      "height": "500",
       "panels": [
         {
           "aliasColors": {},
           "bars": true,
-          "datasource": "telegraf",
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
           "decimals": 1,
           "fill": 1,
           "id": 8,
@@ -663,6 +835,7 @@
               "stack": false
             }
           ],
+          "spaceLength": 10,
           "span": 9,
           "stack": true,
           "steppedLine": false,
@@ -686,6 +859,7 @@
               ],
               "hide": false,
               "measurement": "win_cpu",
+              "orderByTime": "ASC",
               "policy": "autogen",
               "refId": "C",
               "resultFormat": "time_series",
@@ -729,6 +903,7 @@
                 }
               ],
               "measurement": "win_cpu",
+              "orderByTime": "ASC",
               "policy": "autogen",
               "refId": "B",
               "resultFormat": "time_series",
@@ -772,6 +947,7 @@
                 }
               ],
               "measurement": "win_cpu",
+              "orderByTime": "ASC",
               "policy": "default",
               "refId": "A",
               "resultFormat": "time_series",
@@ -826,6 +1002,7 @@
           },
           "type": "graph",
           "xaxis": {
+            "buckets": null,
             "mode": "time",
             "name": null,
             "show": true,
@@ -860,9 +1037,13 @@
           "type": "text"
         },
         {
-          "aliasColors": {},
+          "aliasColors": {
+            "User Time / % Processor Time": "#F9BA8F"
+          },
           "bars": false,
-          "datasource": "telegraf",
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
           "decimals": 1,
           "description": "",
           "fill": 1,
@@ -874,6 +1055,7 @@
             "max": true,
             "min": true,
             "show": true,
+            "sortDesc": true,
             "total": false,
             "values": true
           },
@@ -887,9 +1069,8 @@
           "renderer": "flot",
           "seriesOverrides": [
             {
-              "alias": "mean(% User Time) / mean(% Processor Time)",
+              "alias": "User Time / % Processor Time",
               "color": "#705DA0",
-              "fill": 4,
               "linewidth": 3,
               "yaxis": 1
             },
@@ -907,12 +1088,13 @@
               "yaxis": 2
             }
           ],
+          "spaceLength": 10,
           "span": 9,
           "stack": true,
           "steppedLine": false,
           "targets": [
             {
-              "alias": "mean(% User Time) / mean(% Processor Time)",
+              "alias": "User Time / % Processor Time",
               "dsType": "influxdb",
               "groupBy": [
                 {
@@ -929,8 +1111,9 @@
                 }
               ],
               "measurement": "win_cpu",
+              "orderByTime": "ASC",
               "policy": "autogen",
-              "query": "SELECT mean(\"Percent_User_Time\") / mean(\"Percent_Processor_Time\") FROM \"autogen\".\"win_cpu\" WHERE \"instance\" = '_Total' AND $timeFilter GROUP BY time($stepInterval) fill(none)",
+              "query": "SELECT Percent_User_Time / Percent_Processor_Time FROM autogen.win_cpu WHERE instance = '_Total' AND $timeFilter fill(none)",
               "rawQuery": true,
               "refId": "B",
               "resultFormat": "time_series",
@@ -974,6 +1157,7 @@
                 }
               ],
               "measurement": "win_cpu",
+              "orderByTime": "ASC",
               "policy": "autogen",
               "refId": "A",
               "resultFormat": "time_series",
@@ -1017,6 +1201,7 @@
                 }
               ],
               "measurement": "win_cpu",
+              "orderByTime": "ASC",
               "policy": "autogen",
               "refId": "C",
               "resultFormat": "time_series",
@@ -1076,6 +1261,7 @@
           },
           "type": "graph",
           "xaxis": {
+            "buckets": null,
             "mode": "time",
             "name": null,
             "show": true,
@@ -1101,7 +1287,7 @@
           ]
         },
         {
-          "content": "Метрика дополняет метрику «\\% Privileged Time». Поэтому если значение начало падать ниже 25% и отношение метрики к полному значению «\\% Processor Time» также падает, то момент падения происходит некий переломный момент в нагрузке. Возможно, тут начинается деградация производительности, связанная с процессором, как с узким местом – нужно изучить причины.",
+          "content": "Метрика дополняет метрику «\\% Privileged Time». Поэтому если значение начало падать ниже 25% и отношение метрики к полному значению «\\% Processor Time» также падает, то в момент падения происходит некий переломный момент в нагрузке. Возможно, тут начинается деградация производительности, связанная с процессором, как с узким местом – нужно изучить причины.",
           "id": 21,
           "links": [],
           "mode": "markdown",
@@ -1118,14 +1304,17 @@
       "titleSize": "h6"
     },
     {
-      "collapse": false,
+      "collapse": true,
       "height": "500",
       "panels": [
         {
           "aliasColors": {},
           "bars": false,
-          "datasource": "telegraf",
-          "fill": 1,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "decimals": null,
+          "fill": 0,
           "id": 13,
           "legend": {
             "alignAsTable": true,
@@ -1135,6 +1324,8 @@
             "min": false,
             "rightSide": false,
             "show": true,
+            "sort": "avg",
+            "sortDesc": false,
             "total": false,
             "values": true
           },
@@ -1143,23 +1334,16 @@
           "links": [],
           "nullPointMode": "null",
           "percentage": false,
-          "pointradius": 5,
-          "points": false,
+          "pointradius": 2,
+          "points": true,
           "renderer": "flot",
-          "scopedVars": {
-            "percentile": {
-              "selected": true,
-              "text": "100",
-              "value": "100"
-            }
-          },
           "seriesOverrides": [
             {
               "alias": "win_cpu.percentile {instance: _Total}",
-              "legend": false,
-              "lines": false
+              "legend": false
             }
           ],
+          "spaceLength": 10,
           "span": 9,
           "stack": false,
           "steppedLine": false,
@@ -1187,6 +1371,7 @@
                 }
               ],
               "measurement": "win_cpu",
+              "orderByTime": "ASC",
               "policy": "default",
               "refId": "A",
               "resultFormat": "time_series",
@@ -1235,6 +1420,7 @@
           },
           "type": "graph",
           "xaxis": {
+            "buckets": null,
             "mode": "time",
             "name": null,
             "show": true,
@@ -1265,7 +1451,7 @@
           "links": [],
           "mode": "markdown",
           "span": 3,
-          "title": "Описание",
+          "title": "% Processor Time по ядрам",
           "type": "text"
         }
       ],
@@ -1277,14 +1463,116 @@
       "titleSize": "h6"
     },
     {
-      "collapse": false,
-      "height": 250,
-      "panels": [],
+      "collapse": true,
+      "height": "500",
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "fill": 1,
+          "id": 24,
+          "legend": {
+            "alignAsTable": true,
+            "avg": true,
+            "current": false,
+            "max": true,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "span": 9,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "alias": "% времени прерываний",
+              "dsType": "influxdb",
+              "groupBy": [],
+              "measurement": "win_cpu",
+              "orderByTime": "ASC",
+              "policy": "autogen",
+              "refId": "A",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "Percent_Interrupt_Time"
+                    ],
+                    "type": "field"
+                  }
+                ]
+              ],
+              "tags": []
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "% времени прерываний",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "percent",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": false
+            }
+          ]
+        },
+        {
+          "content": "Резкое увеличение этого значения указывает на потенциальную проблему с оборудованием. Возможно, какое-то устройство работает неправильно.\nУзнать какое именно устройство работает неправильно можно по данным мониторинга «NT Kernel» поставщик данных «Отслеживание ядра Windows», свойство «isr» (прерывания). Мониторинг «NT Kernel» сам по себе требует ресурсов, поэтому его включают при необходимости.\n",
+          "description": "",
+          "id": 25,
+          "links": [],
+          "mode": "markdown",
+          "span": 3,
+          "title": "% Interrupt Time",
+          "type": "text"
+        }
+      ],
       "repeat": null,
       "repeatIteration": null,
       "repeatRowId": null,
-      "showTitle": false,
-      "title": "Dashboard Row",
+      "showTitle": true,
+      "title": "Аппаратные прерывания",
       "titleSize": "h6"
     }
   ],
@@ -1298,11 +1586,11 @@
         "auto_count": 30,
         "auto_min": "10s",
         "current": {
-          "text": "10s",
-          "value": "10s"
+          "text": "1m",
+          "value": "1m"
         },
         "hide": 0,
-        "label": "Шаг группировки",
+        "label": "stepInterval",
         "name": "stepInterval",
         "options": [
           {
@@ -1316,7 +1604,7 @@
             "value": "5s"
           },
           {
-            "selected": true,
+            "selected": false,
             "text": "10s",
             "value": "10s"
           },
@@ -1326,7 +1614,7 @@
             "value": "30s"
           },
           {
-            "selected": false,
+            "selected": true,
             "text": "1m",
             "value": "1m"
           },
@@ -1358,14 +1646,12 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
-          "tags": [],
-          "text": "100",
-          "value": "100"
+          "text": "95",
+          "value": "95"
         },
         "hide": 0,
         "includeAll": false,
-        "label": "Перцентиль",
+        "label": "percentile",
         "multi": false,
         "name": "percentile",
         "options": [
@@ -1395,7 +1681,7 @@
             "value": "90"
           },
           {
-            "selected": false,
+            "selected": true,
             "text": "95",
             "value": "95"
           },
@@ -1420,19 +1706,34 @@
             "value": "99"
           },
           {
-            "selected": true,
+            "selected": false,
             "text": "100",
             "value": "100"
           }
         ],
         "query": "50,60,70,80,90,95,96,97,98,99,100",
         "type": "custom"
+      },
+      {
+        "current": {
+          "tags": [],
+          "text": "telegraf",
+          "value": "telegraf"
+        },
+        "hide": 0,
+        "label": "datasource",
+        "name": "datasource",
+        "options": [],
+        "query": "influxdb",
+        "refresh": 1,
+        "regex": "",
+        "type": "datasource"
       }
     ]
   },
   "time": {
-    "from": "2017-08-16T17:22:25.642Z",
-    "to": "2017-08-16T17:45:06.123Z"
+    "from": "now-5m",
+    "to": "now"
   },
   "timepicker": {
     "refresh_intervals": [
@@ -1461,5 +1762,5 @@
   },
   "timezone": "browser",
   "title": "telegraf",
-  "version": 39
+  "version": 3
 }
